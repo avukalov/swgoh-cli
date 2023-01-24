@@ -1,0 +1,1 @@
+from swgoh.commands.guild import guild
