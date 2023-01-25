@@ -1,3 +1,4 @@
+import json
 from rich.console import Console
 from rich.table import Table
 from rich.columns import Columns
@@ -38,6 +39,38 @@ class Printer:
 
         self.console.print(table)
 
+    def print_gls_compare(self, guilds: list) -> None:
+
+        table = Table(
+            show_lines=True,
+            padding=(0,2),
+        )
+
+        table.add_column('')
+        for gl in guilds[0].gls.keys():
+            table.add_column(guilds[0].gls[gl]['name'], justify='center')
+
+        for guild in guilds:
+            table.add_row(
+                f'[bold]{guild.name}[/bold]',
+                str(guild.gls['JABBATHEHUTT']['count']),
+                str(guild.gls['JEDIMASTERKENOBI']['count']),
+                str(guild.gls['JEDIMASTERLUKSKYWALKER']['count']),
+                str(guild.gls['LORDVADER']['count']),
+                str(guild.gls['GLREY']['count']),
+                str(guild.gls['SITHETERNALEMPEROR']['count']),
+                str(guild.gls['SUPREMELEADERKYLOREN']['count'])
+            )
+            
+            #self.console.print_json(json.dumps(guild.__dict__))
+            # gls_panels = [self.format_gls(guild.gls[key]) for key in guild.gls.keys()]
+            # columns = Columns(gls_panels, title=guild.name, padding=(10, 5))
+            # self.console.print(columns)
+
+        self.console.print(table)
+
+    def format_gls(self, gl: dict) -> str:
+        return f"[bold]{gl['name']}[/bold]\n[bold]{gl['count']}[/bold]"
         
     def format_guilds(self, g1, g2):
 

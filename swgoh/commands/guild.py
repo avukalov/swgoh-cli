@@ -34,6 +34,7 @@ def compare(obj, guilds_to_compare, force):
     
     printer = Printer()
     printer.print_guilds_compare(result)
+    printer.print_gls_compare(result)
 
     # for guild in result:
     #     if guild:
