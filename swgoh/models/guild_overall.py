@@ -1,6 +1,14 @@
-
+from rich.text import Text
 
 class GuildOverall(object):
+
+    name: str
+    memberCount: int | Text
+    gp: int | Text
+    avgGp: int | Text
+    gls: dict[str, dict[Text, int | Text]]
+    ships: dict[str, dict[Text, int | Text]]
+    overall: dict[str, int | Text]
 
     def __init__(self, guild: dict = None) -> None:
         if not guild:

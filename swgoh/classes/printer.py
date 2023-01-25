@@ -1,157 +1,180 @@
-import json
+from swgoh.utils import format_long_number
+from swgoh.models import GuildOverall
+
 from rich.console import Console
+from rich.text import Text
+from rich.box import Box, SQUARE, DOUBLE
 from rich.table import Table
-from rich.columns import Columns
 from rich.panel import Panel
 
 
+
 class Printer:
-    def __init__(self) -> None:
-        self.console = Console()
+    def __init__(self, c: Console) -> None:
+        self.console = c
+        pass
         
 
     def print_guilds_compare(self, guilds: list) -> None:
+        
+        title = Panel(Text("Territory War Report"), box=DOUBLE, padding=(1,0), style="bold blue")
+        table = Table(title=title, box=DOUBLE, show_lines=True)
 
-        table = Table(
-            title="Territory War Comparsion",
-            show_lines=True
-        )
+        guild1, guild2 = self.format_guilds_overall(guilds[0], guilds[1])
 
-        guild_1 = guilds[0]
-        guild_2 = guilds[1]
+        width = len(guild1.name) if len(guild1.name) > len(guild2.name) else len(guild2.name)
 
-        self.format_guilds(guild_1, guild_2)
 
-        table.add_column(guild_1.name, justify='right', min_width=25)
-        table.add_column("vs", justify='center')
-        table.add_column(guild_2.name, justify='left', min_width=25)
+        table.add_column(guild1.name, justify='center', min_width=width)
+        table.add_column("VS", justify='center')
+        table.add_column(guild2.name, justify='center', min_width=width)
 
-        table.add_row(guild_1.memberCount, "Members", guild_2.memberCount)
+        table.add_row(guild1.memberCount, "Members", guild2.memberCount)
 
-        table.add_row(guild_1.gp, "Galactic Power", guild_2.gp)
-        table.add_row(guild_1.overall['characterGp'], "Character GP", guild_2.overall['characterGp'])
-        table.add_row(guild_1.overall['shipGp'], "Ship GP", guild_2.overall['shipGp'])
-        table.add_row(guild_1.avgGp, "Avg Galactic Power", guild_2.avgGp)
+        table.add_row(guild1.gp, "Galactic Power", guild2.gp)
+        table.add_row(guild1.overall['characterGp'], "Character GP", guild2.overall['characterGp'])
+        table.add_row(guild1.overall['shipGp'], "Ship GP", guild2.overall['shipGp'])
+        table.add_row(guild1.avgGp, "Avg Galactic Power", guild2.avgGp)
 
-        table.add_row(guild_1.overall['medSkillRating'], "Skill Rating (median)", guild_2.overall['medSkillRating'])
-        table.add_row(guild_1.overall['medCurrArenaRank'], "Arena Rank (median)", guild_2.overall['medCurrArenaRank'])
-        table.add_row(guild_1.overall['medCurrFleetArenaRank'], "Fleet Arena Rank (median)", guild_2.overall['medCurrFleetArenaRank'])
+        table.add_row(guild1.overall['medSkillRating'], "Skill Rating (median)", guild2.overall['medSkillRating'])
+        table.add_row(guild1.overall['medCurrArenaRank'], "Arena Rank (median)", guild2.overall['medCurrArenaRank'])
+        table.add_row(guild1.overall['medCurrFleetArenaRank'], "Fleet Arena Rank (median)", guild2.overall['medCurrFleetArenaRank'])
 
         self.console.print(table)
 
     def print_gls_compare(self, guilds: list) -> None:
 
-        table = Table(
-            show_lines=True,
-            padding=(0,2),
-        )
+        table = Table(box=DOUBLE, show_lines=True, header_style="bold blue")
 
         table.add_column('')
         for gl in guilds[0].gls.keys():
-            table.add_column(guilds[0].gls[gl]['name'], justify='center')
-
-        for guild in guilds:
-            table.add_row(
-                f'[bold]{guild.name}[/bold]',
-                str(guild.gls['JABBATHEHUTT']['count']),
-                str(guild.gls['JEDIMASTERKENOBI']['count']),
-                str(guild.gls['JEDIMASTERLUKSKYWALKER']['count']),
-                str(guild.gls['LORDVADER']['count']),
-                str(guild.gls['GLREY']['count']),
-                str(guild.gls['SITHETERNALEMPEROR']['count']),
-                str(guild.gls['SUPREMELEADERKYLOREN']['count'])
-            )
             
-            #self.console.print_json(json.dumps(guild.__dict__))
-            # gls_panels = [self.format_gls(guild.gls[key]) for key in guild.gls.keys()]
-            # columns = Columns(gls_panels, title=guild.name, padding=(10, 5))
-            # self.console.print(columns)
+            gl_name = Text(guilds[0].gls[gl]['name'])
+            table.add_column(gl_name, justify='center')
+
+        gls1, gls2 = self.format_gls(guilds[0].gls, guilds[1].gls)
+
+        gls1.insert(0, guilds[0].name)
+        gls2.insert(0, guilds[1].name)
+
+        table.add_row(*gls1)
+        table.add_row(*gls2)
 
         self.console.print(table)
 
-    def format_gls(self, gl: dict) -> str:
-        return f"[bold]{gl['name']}[/bold]\n[bold]{gl['count']}[/bold]"
-        
-    def format_guilds(self, g1, g2):
+    def format_gls(self, gl1: dict, gl2: dict) -> list[list]:
 
-        g1.memberCount = f"[b]{g1.memberCount}[/b]"
-        g2.memberCount = f"[b]{g2.memberCount}[/b]"
-        
+        gls1 = []
+        gls2 = []
+
+        for key in gl1.keys():
+            if gl1[key]['count'] == 0 and gl2[key]['count'] == 0:
+                gls1.append(Text(str(gl1[key]['count']), style="dim"))
+                gls2.append(Text(str(gl2[key]['count']), style="dim"))
+            elif gl1[key]['count'] > gl2[key]['count']:
+                gls1.append(Text(str(gl1[key]['count']), style="bold green"))
+                gls2.append(Text(str(gl2[key]['count']), style="bold red"))
+            elif gl2[key]['count'] > gl1[key]['count']:
+                gls2.append(Text(str(gl2[key]['count']), style="bold green"))
+                gls1.append(Text(str(gl1[key]['count']), style="bold red"))
+            else:
+                gls1.append(Text(str(gl1[key]['count'])))
+                gls2.append(Text(str(gl2[key]['count'])))
+        return [gls1, gls2]
+   
+    def format_guilds_overall(self, g1: GuildOverall, g2: GuildOverall):
+
+        guild1 = GuildOverall()
+        guild2 = GuildOverall()
+
+        guild1.name = Text(g1.name)
+        guild2.name = Text(g2.name)
+
+        # memberCount
+        guild1.memberCount = Text(str(g1.memberCount), style="bold")
+        guild2.memberCount = Text(str(g2.memberCount), style="bold")
+
         # GP
         if g1.gp > g2.gp:
-            g1.gp = "[b][green]{:,}[/b]".format(g1.gp)
-            g2.gp = "[red]{:,}".format(g2.gp)
+            guild1.gp = Text(format_long_number(g1.gp), style="bold green")
+            guild2.gp = Text(format_long_number(g2.gp), style="bold red")
         elif g1.gp < g2.gp:
-            g1.gp = "[red]{:,}".format(g1.gp)
-            g2.gp = "[b][green]{:,}[/b]".format(g2.gp)
+            guild2.gp = Text(format_long_number(g2.gp), style="bold green")
+            guild1.gp = Text(format_long_number(g1.gp), style="bold red")
         else:
-            g1.gp = "[b]{:,}[/b]".format(g1.gp)
-            g2.gp = "[b]{:,}[/b]".format(g2.gp)
+            guild1.gp = Text(format_long_number(g1.gp))
+            guild2.gp = Text(format_long_number(g2.gp))
 
         # Avg GP
         if g1.avgGp > g2.avgGp:
-            g1.avgGp = "[b][green]{:,}[/b]".format(g1.avgGp)
-            g2.avgGp = "[red]{:,}".format(g2.avgGp)
+            guild1.avgGp = Text(format_long_number(g1.avgGp), style="bold green")
+            guild2.avgGp = Text(format_long_number(g2.avgGp), style="bold red")
         elif g1.avgGp < g2.avgGp:
-            g1.avgGp = "[red]{:,}".format(g1.avgGp)
-            g2.avgGp = "[b][green]{:,}[/b]".format(g2.avgGp)
+            guild2.avgGp = Text(format_long_number(g2.avgGp), style="bold green")
+            guild1.avgGp = Text(format_long_number(g1.avgGp), style="bold red")
         else:
-            g1.avgGp = "[b]{:,}[/b]".format(g1.avgGp)
-            g2.avgGp = "[b]{:,}[/b]".format(g2.avgGp)
+            guild1.avgGp = Text(format_long_number(g1.avgGp))
+            guild2.avgGp = Text(format_long_number(g2.avgGp))
 
 
         # Overall characterGp
         if g1.overall['characterGp'] > g2.overall['characterGp']:
-            g1.overall['characterGp'] = "[b][green]{:,}[/b]".format(g1.overall['characterGp'])
-            g2.overall['characterGp'] = "[red]{:,}".format(g2.overall['characterGp'])
+            guild1.overall['characterGp'] = Text(format_long_number(g1.overall['characterGp']), style="bold green")
+            guild2.overall['characterGp'] = Text(format_long_number(g2.overall['characterGp']), style="bold red")
         elif g1.overall['characterGp'] < g2.overall['characterGp']:
-            g1.overall['characterGp'] = "[red]{:,}".format(g1.overall['characterGp'])
-            g2.overall['characterGp'] = "[b][green]{:,}[/b]".format(g2.overall['characterGp'])
+            guild2.overall['characterGp'] = Text(format_long_number(g2.overall['characterGp']), style="bold green")
+            guild1.overall['characterGp'] = Text(format_long_number(g1.overall['characterGp']), style="bold red")
         else:
-            g1.overall['characterGp'] = "[b]{:,}[/b]".format(g1.overall['characterGp'])
-            g2.overall['characterGp'] = "[b]{:,}[/b]".format(g2.overall['characterGp'])
-
+            guild1.overall['characterGp'] = Text(format_long_number(g1.overall['characterGp']))
+            guild2.overall['characterGp'] = Text(format_long_number(g2.overall['characterGp']))
         
+
         # Overall shipGp
         if g1.overall['shipGp'] > g2.overall['shipGp']:
-            g1.overall['shipGp'] = "[b][green]{:,}[/b]".format(g1.overall['shipGp'])
-            g2.overall['shipGp'] = "[red]{:,}".format(g2.overall['shipGp'])
+            guild1.overall['shipGp'] = Text(format_long_number(g1.overall['shipGp']), style="bold green")
+            guild2.overall['shipGp'] = Text(format_long_number(g2.overall['shipGp']), style="bold red")
         elif g1.overall['shipGp'] < g2.overall['shipGp']:
-            g1.overall['shipGp'] = "[red]{:,}".format(g1.overall['shipGp'])
-            g2.overall['shipGp'] = "[b][green]{:,}[/b]".format(g2.overall['shipGp'])
+            guild2.overall['shipGp'] = Text(format_long_number(g2.overall['shipGp']), style="bold green")
+            guild1.overall['shipGp'] = Text(format_long_number(g1.overall['shipGp']), style="bold red")
         else:
-            g1.overall['shipGp'] = "[b]{:,}[/b]".format(g1.overall['shipGp'])
-            g2.overall['shipGp'] = "[b]{:,}[/b]".format(g2.overall['shipGp'])
+            guild1.overall['shipGp'] = Text(format_long_number(g1.overall['shipGp']))
+            guild2.overall['shipGp'] = Text(format_long_number(g2.overall['shipGp']))
+
 
         # Overall medSkillRating
         if g1.overall['medSkillRating'] > g2.overall['medSkillRating']:
-            g1.overall['medSkillRating'] = "[b][green]{:,}[/b]".format(g1.overall['medSkillRating'])
-            g2.overall['medSkillRating'] = "[red]{:,}".format(g2.overall['medSkillRating'])
+            guild1.overall['medSkillRating'] = Text(format_long_number(g1.overall['medSkillRating']), style="bold green")
+            guild2.overall['medSkillRating'] = Text(format_long_number(g2.overall['medSkillRating']), style="bold red")
         elif g1.overall['medSkillRating'] < g2.overall['medSkillRating']:
-            g1.overall['medSkillRating'] = "[red]{:,}".format(g1.overall['medSkillRating'])
-            g2.overall['medSkillRating'] = "[b][green]{:,}[/b]".format(g2.overall['medSkillRating'])
+            guild2.overall['medSkillRating'] = Text(format_long_number(g2.overall['medSkillRating']), style="bold green")
+            guild1.overall['medSkillRating'] = Text(format_long_number(g1.overall['medSkillRating']), style="bold red")
         else:
-            g1.overall['medSkillRating'] = "[b]{:,}[/b]".format(g1.overall['medSkillRating'])
-            g2.overall['medSkillRating'] = "[b]{:,}[/b]".format(g2.overall['medSkillRating'])
+            guild1.overall['medSkillRating'] = Text(format_long_number(g1.overall['medSkillRating']))
+            guild2.overall['medSkillRating'] = Text(format_long_number(g2.overall['medSkillRating']))
 
         # Overall medCurrArenaRank
-        if g1.overall['medCurrArenaRank'] < g2.overall['medCurrArenaRank']:
-            g1.overall['medCurrArenaRank'] = "[b][green]{:,}[/b]".format(g1.overall['medCurrArenaRank'])
-            g2.overall['medCurrArenaRank'] = "[red]{:,}".format(g2.overall['medCurrArenaRank'])
-        elif g1.overall['medCurrArenaRank'] > g2.overall['medCurrArenaRank']:
-            g1.overall['medCurrArenaRank'] = "[red]{:,}".format(g1.overall['medCurrArenaRank'])
-            g2.overall['medCurrArenaRank'] = "[b][green]{:,}[/b]".format(g2.overall['medCurrArenaRank'])
+        if g1.overall['medCurrArenaRank'] > g2.overall['medCurrArenaRank']:
+            guild1.overall['medCurrArenaRank'] = Text(format_long_number(g1.overall['medCurrArenaRank']), style="bold red")
+            guild2.overall['medCurrArenaRank'] = Text(format_long_number(g2.overall['medCurrArenaRank']), style="bold green")
+        elif g1.overall['medCurrArenaRank'] < g2.overall['medCurrArenaRank']:
+            guild2.overall['medCurrArenaRank'] = Text(format_long_number(g2.overall['medCurrArenaRank']), style="bold red")
+            guild1.overall['medCurrArenaRank'] = Text(format_long_number(g1.overall['medCurrArenaRank']), style="bold green")
         else:
-            g1.overall['medCurrArenaRank'] = "[b]{:,}[/b]".format(g1.overall['medCurrArenaRank'])
-            g2.overall['medCurrArenaRank'] = "[b]{:,}[/b]".format(g2.overall['medCurrArenaRank'])
+            guild1.overall['medCurrArenaRank'] = Text(format_long_number(g1.overall['medCurrArenaRank']))
+            guild2.overall['medCurrArenaRank'] = Text(format_long_number(g2.overall['medCurrArenaRank']))
+
         
         # Overall medCurrFleetArenaRank
-        if g1.overall['medCurrFleetArenaRank'] < g2.overall['medCurrFleetArenaRank']:
-            g1.overall['medCurrFleetArenaRank'] = "[b][green]{:,}[/b]".format(g1.overall['medCurrFleetArenaRank'])
-            g2.overall['medCurrFleetArenaRank'] = "[red]{:,}".format(g2.overall['medCurrFleetArenaRank'])
-        elif g1.overall['medCurrFleetArenaRank'] > g2.overall['medCurrFleetArenaRank']:
-            g1.overall['medCurrFleetArenaRank'] = "[red]{:,}".format(g1.overall['medCurrFleetArenaRank'])
-            g2.overall['medCurrFleetArenaRank'] = "[b][green]{:,}[/b]".format(g2.overall['medCurrFleetArenaRank'])
+        if g1.overall['medCurrFleetArenaRank'] > g2.overall['medCurrFleetArenaRank']:
+            guild1.overall['medCurrFleetArenaRank'] = Text(format_long_number(g1.overall['medCurrFleetArenaRank']), style="bold red")
+            guild2.overall['medCurrFleetArenaRank'] = Text(format_long_number(g2.overall['medCurrFleetArenaRank']), style="bold green")
+        elif g1.overall['medCurrFleetArenaRank'] < g2.overall['medCurrFleetArenaRank']:
+            guild2.overall['medCurrFleetArenaRank'] = Text(format_long_number(g2.overall['medCurrFleetArenaRank']), style="bold red")
+            guild1.overall['medCurrFleetArenaRank'] = Text(format_long_number(g1.overall['medCurrFleetArenaRank']), style="bold green")
         else:
-            g1.overall['medCurrFleetArenaRank'] = "[b]{:,}[/b]".format(g1.overall['medCurrFleetArenaRank'])
-            g2.overall['medCurrFleetArenaRank'] = "[b]{:,}[/b]".format(g2.overall['medCurrFleetArenaRank'])
+            guild1.overall['medCurrFleetArenaRank'] = Text(format_long_number(g1.overall['medCurrFleetArenaRank']))
+            guild2.overall['medCurrFleetArenaRank'] = Text(format_long_number(g2.overall['medCurrFleetArenaRank']))
+
+        
+        return [guild1, guild2]
+

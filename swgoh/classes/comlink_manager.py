@@ -9,18 +9,7 @@ class ComlinkManager:
     def __init__(self) -> None:
         self.cache = CacheManager()
         self.comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
-
-        # HSET
-        self.gls = {
-            "JABBATHEHUTT": { 'name': "JABBA", 'count': 0 },
-            "JEDIMASTERKENOBI": { 'name': "JMK", 'count': 0 },
-            "JEDIMASTERLUKSKYWALKER": { 'name': "JMLS", 'count': 0 },
-            "LORDVADER": { 'name': "LV", 'count': 0 },
-            "GLREY": { 'name': "REY", 'count': 0 },
-            "SITHETERNALEMPEROR": { 'name': "SEE", 'count': 0 },
-            "SUPREMELEADERKYLOREN": { 'name': "SLKR", 'count': 0 }
-        }
-        
+ 
     
     def get_guild(self, guild_id: str, force: bool = False) -> dict:
         
