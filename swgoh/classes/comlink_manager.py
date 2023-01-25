@@ -9,7 +9,7 @@ class ComlinkManager:
     def __init__(self) -> None:
         self.cache = CacheManager()
         self.comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
-        
+ 
     
     def get_guild(self, guild_id: str, force: bool = False) -> dict:
         
@@ -47,17 +47,24 @@ class ComlinkManager:
         guild_overall.memberCount = guild['profile']['memberCount']
         guild_overall.gp = int(guild['profile']['guildGalacticPower'])
         guild_overall.avgGp = round(guild_overall.gp / guild_overall.memberCount)
-        
+
+
         skill_ratings = []
         arena_ranks = []
         fleet_arena_ranks = []
+
+        # TODO: Split implementetion of guild overall and members 
         for member in guild['member']:
             
+            # TODO: Move out of here
             member = self.comlink.get_player(player_id=member['playerId'])
             if not member:
                 continue
             
             self.cache.hset(f'{guild_id}.members', member['playerId'], member)
+            # TODO: Move out of here
+
+
             
             guild_overall.overall['characterGp'] += int(next((item['value'] for item in member['profileStat'] if item["nameKey"] == "STAT_CHARACTER_GALACTIC_POWER_ACQUIRED_NAME"), 0))
             guild_overall.overall['shipGp'] += int(next((item['value'] for item in member['profileStat'] if item["nameKey"] == "STAT_SHIP_GALACTIC_POWER_ACQUIRED_NAME"), 0))
@@ -67,6 +74,17 @@ class ComlinkManager:
 
             arena_ranks.append(member['pvpProfile'][0]['rank'])
             fleet_arena_ranks.append(member['pvpProfile'][1]['rank'])
+
+
+            # Galactic Legends and TODO: Ships
+
+            for unit in member['rosterUnit']:
+                for gl in guild_overall.gls.keys():
+                    if gl in unit['definitionId']:
+                        guild_overall.gls[gl]['count'] += 1
+            
+        # TODO: Split implementetion of guild overall and members 
+        
         
         guild_overall.overall['medSkillRating'] = median(skill_ratings)
         guild_overall.overall['medCurrArenaRank'] = median(arena_ranks)

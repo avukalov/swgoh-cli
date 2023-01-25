@@ -20,8 +20,8 @@ def get_guild_report(guild_name):
         count = 0
         gls_list = []
         for member in guild['member']:
-            player = comlink.get_player(player_id=member['playerId'])
             
+            player = comlink.get_player(player_id=member['playerId'])
             gls = json.loads(redis.get('GLS'))
             for unit in player['rosterUnit']:
                 for gl in gls:

@@ -1,5 +1,7 @@
 import click
+from swgoh import console
 from swgoh.classes import GuildManager, Printer
+
 
 
 @click.group()
@@ -32,8 +34,14 @@ def compare(obj, guilds_to_compare, force):
     if len(result) < 2:
         click.echo("Not all guilds are found!")
     
-    printer = Printer()
+    printer = Printer(console)
     printer.print_guilds_compare(result)
+    printer.print_gls_compare(result)
+
+    console.save_svg(
+        title="TW Report",
+        path="C:/workspace/swgoh-cli/swgoh/data/TW_report.svg",
+    )
 
     # for guild in result:
     #     if guild:
