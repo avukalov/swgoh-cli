@@ -18,7 +18,8 @@ class TWReportBuilder:
         self.__guild.gp = int(guild['profile']['guildGalacticPower'])
         self.__guild.avgGp = self.__guild.gp // self.__guild.memberCount
 
-    def add_members_stats(self, member: dict) -> None:
+
+    def add_member_stats(self, member: dict) -> None:
         
         self.__guild.overall['characterGp'] += int(next((item['value'] for item in member['profileStat'] if item["nameKey"] == "STAT_CHARACTER_GALACTIC_POWER_ACQUIRED_NAME"), 0))
         self.__guild.overall['shipGp'] += int(next((item['value'] for item in member['profileStat'] if item["nameKey"] == "STAT_SHIP_GALACTIC_POWER_ACQUIRED_NAME"), 0))
@@ -34,17 +35,19 @@ class TWReportBuilder:
                 if gl in unit['definitionId']:
                     self.__guild.gls[gl]['count'] += 1
 
+
     def add_total_ratings(self) -> None:
         self.__guild.overall['medSkillRating'] = median(self.__skill_ratings)
         self.__guild.overall['medCurrArenaRank'] = median(self.__arena_ranks)
         self.__guild.overall['medCurrFleetArenaRank'] = median(self.__fleet_arena_ranks)
     
     
-    def build(self) -> GuildTwReport:
-        return self.__guild
-
     def reset(self) -> None:
         self.__guild = GuildTwReport()
         self.__skill_ratings = []
         self.__arena_ranks = []
         self.__fleet_arena_ranks = []
+
+    
+    def build(self) -> GuildTwReport:
+        return self.__guild

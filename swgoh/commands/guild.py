@@ -27,7 +27,7 @@ def compare(ctx, ids, sync, export):
         console.print("Execute: swgoh guild compare --help to show more info.")
         return
 
-    result = GuildService().compare_2(ids, sync)
+    result = GuildService().compare(ids, sync)
     
     if len(result) < 2:
         console.print("Not all guilds are found!")
@@ -39,26 +39,6 @@ def compare(ctx, ids, sync, export):
     # console.print(os.path.abspath(export))
     if export:
         printer.export_svg(export, [guild.name for guild in result])
-
-
-@guild.command()
-@click.argument('ids', required=True, type=str, nargs=-1)
-@click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
-@click.option('--sync', is_flag=True, help="Calls api to get most recent data even if data cached")
-@click.pass_context
-def compare2(ctx, ids, sync, export):
-    # console.print(type(ids))
-    # return 
-    ids = validate_compare_input(ctx.obj, ids)
-    if not ids:
-        console.print("Execute: swgoh guild compare --help to show more info.")
-        return
-
-    result = GuildService().compare_2(ids, sync)
-    
-    for res in result:
-        console.print_json(json.dumps(res.__dict__))
-
 
 
 def validate_compare_input(obj: dict, ids: Tuple[str, str]) -> Tuple[str, str] | None:
