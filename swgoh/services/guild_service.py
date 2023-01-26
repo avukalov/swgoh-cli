@@ -13,7 +13,7 @@ class GuildService(ComlinkSyncService):
 
     def compare(self, ids: Tuple[str, str], call_api: bool = False) -> list[GuildTwReport | None]:
         
-        missing_reports = []
+        missing_reports = [id for id in ids]
         if not call_api:
             
             reports = [self.get_guild_report(id, GuildReportKeys.TW) for id in ids]

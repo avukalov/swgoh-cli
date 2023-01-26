@@ -15,8 +15,8 @@ def guild(ctx, home):
 
 @guild.command()
 @click.argument('ids', required=True, type=str, nargs=-1)
-@click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
 @click.option('--sync', is_flag=True, help="Calls api to get most recent data even if data cached")
+@click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
 @click.pass_context
 def compare(ctx, ids, sync, export):
     
