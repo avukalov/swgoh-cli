@@ -1,5 +1,7 @@
+import os
+from swgoh import console
 from swgoh.utils import format_long_number
-from swgoh.models import GuildOverall
+from swgoh.models import GuildTwReport
 
 from rich.console import Console
 from rich.text import Text
@@ -10,10 +12,17 @@ from rich.panel import Panel
 
 
 class Printer:
-    def __init__(self, c: Console) -> None:
-        self.console = c
+    def __init__(self) -> None:
+        self.console = console
         pass
-        
+    
+    def export_svg(self, path: str, guilds_name: list[str]) -> None:
+        g = [name.replace(' ', '_') for name in guilds_name]
+
+        console.save_svg(
+            title="TW Report",
+            path=f"{os.path.abspath(path)}\\tw_report_{g[0]}_{g[1]}.svg",
+        )
 
     def print_guilds_compare(self, guilds: list) -> None:
         
@@ -82,10 +91,10 @@ class Printer:
                 gls2.append(Text(str(gl2[key]['count'])))
         return [gls1, gls2]
    
-    def format_guilds_overall(self, g1: GuildOverall, g2: GuildOverall):
+    def format_guilds_overall(self, g1: GuildTwReport, g2: GuildTwReport):
 
-        guild1 = GuildOverall()
-        guild2 = GuildOverall()
+        guild1 = GuildTwReport()
+        guild2 = GuildTwReport()
 
         guild1.name = Text(g1.name)
         guild2.name = Text(g2.name)

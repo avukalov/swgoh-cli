@@ -6,9 +6,10 @@ setup(
     packages=[
         'swgoh',
         'swgoh.apis',
-        'swgoh.classes',
+        'swgoh.builders',
         'swgoh.commands',
         'swgoh.models',
+        'swgoh.services',
         'swgoh.tests',
         'swgoh.utils',
     ],
