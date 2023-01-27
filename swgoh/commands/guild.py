@@ -1,6 +1,7 @@
-import click
+import os, click, json
+from typing import Tuple
 from swgoh import console
-from swgoh.classes import GuildManager, Printer
+from swgoh.services import GuildService, Printer
 
 
 
@@ -8,48 +9,52 @@ from swgoh.classes import GuildManager, Printer
 @click.option('--home', envvar='GUILD_ID', default='')
 @click.pass_context
 def guild(ctx, home):
-    ctx.obj = { 'guild_id':  home }
+    ctx.obj = { 'my_guild_id':  home }
     
 
 
 @guild.command()
-@click.argument('guilds_to_compare', required=True, type=str, nargs=-1)
-@click.option('--force', is_flag=True)
-@click.pass_obj
-def compare(obj, guilds_to_compare, force):
+@click.argument('ids', required=True, type=str, nargs=-1)
+@click.option('--sync', is_flag=True, help="Calls api to get most recent data even if data cached")
+@click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
+@click.pass_context
+def compare(ctx, ids, sync, export):
     
-    guild_manager = GuildManager()
-    guilds_to_compare = list(guilds_to_compare)
-
-    if len(guilds_to_compare) < 1:
-        click.echo("Guild id/s missing.... ")
+    # console.print(type(ids))
+    # return 
+    ids = validate_compare_input(ctx.obj, ids)
+    if not ids:
+        console.print("Execute: swgoh guild compare --help to show more info.")
         return
-    
-    if len(guilds_to_compare) == 1:
-        # TODO: Check if default guild is set in ctx.obj
-        guilds_to_compare.insert(0, obj['guild_id'])
-    
-    result = guild_manager.compare(guilds_to_compare, force)
+
+    result = GuildService().compare(ids, sync)
     
     if len(result) < 2:
-        click.echo("Not all guilds are found!")
+        console.print("Not all guilds are found!")
     
-    printer = Printer(console)
+    printer = Printer()
     printer.print_guilds_compare(result)
     printer.print_gls_compare(result)
 
-    console.save_svg(
-        title="TW Report",
-        path="C:/workspace/swgoh-cli/swgoh/data/TW_report.svg",
-    )
+    # console.print(os.path.abspath(export))
+    if export:
+        printer.export_svg(export, [guild.name for guild in result])
 
-    # for guild in result:
-    #     if guild:
-    #         click.secho(guild.name, bold=True, fg='green')
-    #         click.secho(guild.gp)
-    #         click.secho(guild.overall)
-    #     else: 
-    #         click.echo("Guild not found")
+
+def validate_compare_input(obj: dict, ids: Tuple[str, str]) -> Tuple[str, str] | None:
+    
+    if len(ids) > 2:
+        return (ids[0], ids[1])
+    
+    if len(ids) == 1:
+        my_guild = obj['my_guild_id']
+        if not my_guild:
+            return None
+        ids = (obj['my_guild_id'], ids[0])
+
+    return ids
+
+
 
     
     

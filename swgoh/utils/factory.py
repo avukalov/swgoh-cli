@@ -1,7 +1,7 @@
 import os
 from redis import Redis
 from swgoh_comlink import SwgohComlink
-from swgoh.classes import cache_manager
+from swgoh.services import cache_manager
 
 
 def create_swgoh_comlink() -> SwgohComlink:

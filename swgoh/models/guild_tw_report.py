@@ -1,8 +1,9 @@
 from rich.text import Text
 
-class GuildOverall(object):
+class GuildTwReport(object):
 
-    name: str
+    id: str | Text
+    name: str | Text
     memberCount: int | Text
     gp: int | Text
     avgGp: int | Text
@@ -13,6 +14,7 @@ class GuildOverall(object):
     def __init__(self, guild: dict = None) -> None:
         if not guild:
             guild = {
+                'id': '',
                 'name': '',
                 'memberCount': 0,
                 'gp': 0,
