@@ -2,14 +2,19 @@ import os, click, json
 from typing import Tuple
 from swgoh import console
 from swgoh.services import GuildService, Printer
+from swgoh.utils import config
 
 
 
 @click.group()
-@click.option('--home', envvar='GUILD_ID', default='')
+@click.option('--set-home', type=str, required=False, help="Saves home guild id for further use ")
 @click.pass_context
-def guild(ctx, home):
-    ctx.obj = { 'my_guild_id':  home }
+def guild(ctx, set_home):
+    if set_home:
+        os.environ['GUILD_ID'] = set_home
+        ctx.obj['home_guild_id'] = set_home
+    
+    ctx.obj['home_guild_id'] = os.getenv('GUILD_ID')
     
 
 
@@ -20,8 +25,6 @@ def guild(ctx, home):
 @click.pass_context
 def compare(ctx, ids, sync, export):
     
-    # console.print(type(ids))
-    # return 
     ids = validate_compare_input(ctx.obj, ids)
     if not ids:
         console.print("Execute: swgoh guild compare --help to show more info.")
@@ -32,13 +35,57 @@ def compare(ctx, ids, sync, export):
     if len(result) < 2:
         console.print("Not all guilds are found!")
     
+    # TODO: Improve printer
     printer = Printer()
     printer.print_guilds_compare(result)
     printer.print_gls_compare(result)
 
-    # console.print(os.path.abspath(export))
     if export:
         printer.export_svg(export, [guild.name for guild in result])
+
+
+
+#
+# TERRITORY BATTLES SECTION
+#
+#
+@click.group()
+@click.pass_context
+def tb(ctx):
+    pass
+
+
+@tb.command()
+@click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
+@click.pass_context
+def dshoth(ctx, export):
+    guild_id = ctx.obj['home_guild_id']
+    result = GuildService().get_hoth_requirements(guild_id)
+    
+    printer = Printer()
+    printer.print_tb_req(result)
+    if export:
+        console.save_svg(
+            title="TW Report",
+            path=f"{os.path.abspath(export)}.svg",
+        )
+    
+    #console.print_json(json.dumps(result[0][0].__dict__))
+
+
+
+
+@tb.command()
+@click.pass_context
+def test(ctx):
+    guild_id = ctx.obj['home_guild_id']
+    # result = GuildService().get_hoth_requirements(guild_id)
+    console.print_json(json.dumps(config))
+
+
+
+guild.add_command(tb)
+guild.add_command(dshoth)
 
 
 def validate_compare_input(obj: dict, ids: Tuple[str, str]) -> Tuple[str, str] | None:
@@ -47,10 +94,10 @@ def validate_compare_input(obj: dict, ids: Tuple[str, str]) -> Tuple[str, str] |
         return (ids[0], ids[1])
     
     if len(ids) == 1:
-        my_guild = obj['my_guild_id']
+        my_guild = obj['home_guild_id']
         if not my_guild:
             return None
-        ids = (obj['my_guild_id'], ids[0])
+        ids = (obj['home_guild_id'], ids[0])
 
     return ids
 

@@ -9,3 +9,5 @@ class GuildReportKeys(Enum):
     RAID = 2
 
 
+class TBKeys(Enum):
+    DSHOTH = "TB_HOTH_IMPERIAL_RETALIATION"
