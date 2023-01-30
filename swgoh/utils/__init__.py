@@ -4,6 +4,8 @@ import json
 def format_long_number(number: int) -> str:
         return "{:,}".format(number)
 
+def format_allyCode(allyCode: int):
+        return '-'.join(str(allyCode[i:i+3]) for i in range(0, len(allyCode), 3))
 
 def get_config() -> dict:
         

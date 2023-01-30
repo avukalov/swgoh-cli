@@ -1,6 +1,6 @@
 import os
 from swgoh import console
-from swgoh.utils import format_long_number
+from swgoh.utils import format_long_number, format_allyCode
 from swgoh.models import GuildTwReport, PlayerBase, UnitBase
 
 from rich.console import Console
@@ -81,9 +81,13 @@ class Printer:
             table.add_column('', style="blue")
             table.add_column('', style="yellow")
 
-            table.add_row('Player Name', member.name)
-            table.add_row('Galactic Power', format_long_number(member.gp))
-            table.add_row('Roster', Columns([self.format_unit_tb(unit) for unit in member.roster]))
+            table.add_row('Player', f"{member.name}")
+            table.add_row('Galactic Power', f"{format_long_number(member.gp)} GP")
+            table.add_row('Ally Code', format_allyCode(member.allyCode))
+
+            table.add_section()
+
+            table.add_row('Roster', Columns([self.format_unit_tb(unit) for unit in member.roster]), style="white")
 
             console.print(table)
 
@@ -96,6 +100,7 @@ class Printer:
 
         panel.renderable = f"{unit.name}\n"
         panel.renderable += f"GP: {format_long_number(unit.gp)}\n"
+        panel.renderable += f"Gear: {unit.gear}\n"
         panel.renderable += f"Stars: {unit.stars}\n"
         panel.renderable += f"Lv: {unit.level}"
         return panel

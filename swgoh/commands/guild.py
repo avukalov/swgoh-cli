@@ -1,4 +1,4 @@
-import os, click, json
+import os, click, json, datetime
 from typing import Tuple
 from swgoh import console
 from swgoh.services import GuildService, Printer
@@ -61,17 +61,18 @@ def tb(ctx):
 def dshoth(ctx, export):
     guild_id = ctx.obj['home_guild_id']
     result = GuildService().get_hoth_requirements(guild_id)
+
+
     
     printer = Printer()
     printer.print_tb_req(result)
     if export:
         console.save_svg(
-            title="TW Report",
+            title=f"TB DS HOTH Report - ({len(result)} records) - {datetime.datetime.now().date()}",
             path=f"{os.path.abspath(export)}.svg",
         )
     
     #console.print_json(json.dumps(result[0][0].__dict__))
-
 
 
 

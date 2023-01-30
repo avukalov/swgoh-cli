@@ -54,10 +54,13 @@ class GuildService(ComlinkSyncService):
 
         members_rosters = []
         for member in members:
+            
             roster = []
             for unit in member['rosterUnit']:
+                
                 unit_name = unit['definitionId'].split(':')[0]
                 if unit_name in config['category'][territory_battle['requiremants']['category_req']]:
+                    
                     roster.append(unit)
 
             r = requests.post(
@@ -66,26 +69,48 @@ class GuildService(ComlinkSyncService):
                     data=json.dumps(roster)
                 )
 
-            sorted_response: list[UnitBase] = []
+            counter = 0
+            counter_roster = []
+
+            units_list: list[UnitBase] = []
             for unit in json.loads(r.text):
+                if(counter >= 3 and 'VEERS' in counter_roster and 'COLONESTARCK' in counter_roster):
+                    break
+
+                if (unit['currentRarity'] == 7 and unit['currentTier'] > 10 and unit['currentLevel'] >= 80) or int(unit['gp']) > 13300:
+                        counter += 1
+                        counter_roster.append(unit_name)
+
                 u = UnitBase()
                 u.name = config['imperial_troopers'][unit['definitionId'].split(':')[0]]
                 u.gp = unit['gp']
                 u.stars = unit['currentRarity']
                 u.gear = unit['currentTier']
                 u.level = unit['currentLevel']
-                sorted_response.append(u)
+                units_list.append(u)
             
+            if counter >= 3:
+                continue
+
             player = PlayerBase()
             player.id = member['playerId']
             player.allyCode = member['allyCode']
             player.name = member['name']
             player.gp = int([stat['value'] for stat in member['profileStat'] if stat['nameKey'] == "STAT_GALACTIC_POWER_ACQUIRED_NAME"][0])
-            player.roster = sorted(sorted_response, key=lambda unit: unit.gp, reverse=True)
+            player.roster = sorted(units_list, key=lambda unit: unit.gp, reverse=True)
 
             members_rosters.append(player)
+            # break
         
         return sorted(members_rosters, key=lambda p: p.gp)
 
+    # def filter_members_tb(unit) -> int:
+
+    #     if unit['currentRarity'] == 7 and unit['currentTier'] > 10 and unit['currentLevel'] >= 80:
+    #             return 1
+    #     unit_name = unit['definitionId'].split(':')[0]
+    #     if unit_name in ['VEERS', 'COLONESTARCK']:
+            
+    #     return 0
 
         
