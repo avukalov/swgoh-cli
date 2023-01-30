@@ -1,16 +1,16 @@
 import os
 from statistics import median
 from swgoh_comlink import SwgohComlink
-from swgoh.services import CacheManager 
-from swgoh.models import GuildTwReport, GuildReportKeys
+from swgoh.shared import RedisAdapter 
+from swgoh.shared.models import GuildTwReport, GuildReportKeys
 
 class ComlinkSyncService:
     
     def __init__(self) -> None:
-        self._cache = CacheManager()
+        self._cache = RedisAdapter()
         self._comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
         
-        # self._cache = CacheManager()
+        # self._cache = RedisAdapter()
         # self._comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
 
  

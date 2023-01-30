@@ -1,7 +1,7 @@
 import os, json
 from redis import Redis
 
-class CacheManager():
+class RedisAdapter():
 
     def __init__(self) -> None:
         self.__redis = Redis(

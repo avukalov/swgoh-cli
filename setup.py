@@ -5,18 +5,17 @@ setup(
     version='0.1.0',
     packages=[
         'swgoh',
-        'swgoh.apis',
-        'swgoh.builders',
-        'swgoh.commands',
-        'swgoh.models',
-        'swgoh.services',
+        'swgoh.config',
+        'swgoh.guild',
+        'swgoh.player',
+        'swgoh.shared',
         'swgoh.tests',
-        'swgoh.utils',
     ],
     # scripts=['capitalize/bin/cap_script.py'],
     # package_data={'capitalize': ['data/cap_data.txt']}
     install_requires=[
-        'Click',
+        'AsyncClick',
+        'anyio',
         'swgoh_comlink',
         'python-dotenv',
         'redis'

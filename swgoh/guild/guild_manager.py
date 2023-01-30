@@ -1,13 +1,12 @@
 import requests, json
 from typing import Tuple
-from swgoh.models import GuildReportKeys, TBKeys, UnitBase, PlayerBase
-from swgoh.services import ComlinkSyncService
-from swgoh.builders import TWReportBuilder
-from swgoh.models import GuildTwReport
-from swgoh.utils import config
+from swgoh.shared.models import GuildTwReport, GuildReportKeys, TBKeys, UnitBase, PlayerBase
+from swgoh.shared import ComlinkSyncService
+from swgoh.guild.tw_report_builder import TWReportBuilder
+from swgoh.config import config
 
 
-class GuildService(ComlinkSyncService):
+class GuildManager(ComlinkSyncService):
 
     def __init__(self) -> None:
         ComlinkSyncService.__init__(self)

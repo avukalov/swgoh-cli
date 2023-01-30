@@ -1,5 +1,6 @@
 from rich.text import Text
-from swgoh.models import UnitBase
+
+from swgoh.shared.models import UnitBase
 
 
 class PlayerBase:

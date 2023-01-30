@@ -1,7 +1,7 @@
 import os
 from swgoh import console
-from swgoh.utils import format_long_number, format_allyCode
-from swgoh.models import GuildTwReport, PlayerBase, UnitBase
+from swgoh.config import format_long_number, format_allyCode
+from swgoh.shared.models import GuildTwReport, PlayerBase, UnitBase
 
 from rich.console import Console
 from rich.text import Text

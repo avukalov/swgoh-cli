@@ -4,3 +4,4 @@ from rich.traceback import install
 install()
 
 console = Console(record=True)
+

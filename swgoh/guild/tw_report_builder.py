@@ -1,4 +1,4 @@
-from swgoh.models import GuildTwReport
+from swgoh.shared.models import GuildTwReport
 from statistics import median
 
 class TWReportBuilder:

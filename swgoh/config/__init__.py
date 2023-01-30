@@ -1,3 +1,6 @@
+from swgoh.config.config import config as config_group
+
+
 import json
 
 
@@ -11,7 +14,7 @@ def get_config() -> dict:
         
         config = {}
 
-        with open('./swgoh/utils/game_data.json', 'r') as game_data:
+        with open('./swgoh/config/game_data.json', 'r') as game_data:
                 config = json.load(game_data)
 
         return config
