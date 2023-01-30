@@ -1,13 +1,14 @@
 import os
 from swgoh import console
-from swgoh.utils import format_long_number
-from swgoh.models import GuildTwReport
+from swgoh.utils import format_long_number, format_allyCode
+from swgoh.models import GuildTwReport, PlayerBase, UnitBase
 
 from rich.console import Console
 from rich.text import Text
 from rich.box import Box, SQUARE, DOUBLE
 from rich.table import Table
 from rich.panel import Panel
+from rich.columns import Columns
 
 
 
@@ -70,6 +71,41 @@ class Printer:
         table.add_row(*gls2)
 
         self.console.print(table)
+
+    def print_tb_req(self, members: list[PlayerBase]) -> None:
+
+        for member in members:
+            #title = Panel(Text(f"{member.name} | {member.allyCode}"), box=DOUBLE, title_align='left', style="bold blue")
+            table = Table(box=SQUARE, show_lines=True, show_header=False)
+            
+            table.add_column('', style="blue")
+            table.add_column('', style="yellow")
+
+            table.add_row('Player', f"{member.name}")
+            table.add_row('Galactic Power', f"{format_long_number(member.gp)} GP")
+            table.add_row('Ally Code', format_allyCode(member.allyCode))
+
+            table.add_section()
+
+            table.add_row('Roster', Columns([self.format_unit_tb(unit) for unit in member.roster]), style="white")
+
+            console.print(table)
+
+    def format_unit_tb(self, unit: UnitBase):
+        panel = Panel('')
+        if unit.gp < 13300:
+            panel.border_style = "red"
+        else:
+            panel.border_style = "green"
+
+        panel.renderable = f"{unit.name}\n"
+        panel.renderable += f"GP: {format_long_number(unit.gp)}\n"
+        panel.renderable += f"Gear: {unit.gear}\n"
+        panel.renderable += f"Stars: {unit.stars}\n"
+        panel.renderable += f"Lv: {unit.level}"
+        return panel
+        
+
 
     def format_gls(self, gl1: dict, gl2: dict) -> list[list]:
 

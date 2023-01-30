@@ -1,0 +1,50 @@
+{
+
+    "TB": {
+        "TB_HOTH_IMPERIAL_RETALIATION": {
+            "battles": {
+                "PROBE_DROID": {
+                    "name": "probe_droid_shards",
+                    "shard_count_per_win": 1,
+                    "requiremants": {
+                        "category_req": "imperial_troopers",
+                        "units_req": ["VEERS", "COLONELSTARCK"],
+                        "gp_per_unit": 13000,
+                        "stars": 5
+                    }
+                }
+            }
+        }
+    },
+
+
+    "category": {
+        "imperial_troopers": [
+            "COLONELSTARCK",
+            "DARKTROOPER",
+            "DEATHTROOPER",
+            "STORMTROOPER",
+            "MOFFGIDEONS1",
+            "VEERS",
+            "IDENVERSIOEMPIRE",
+            "MAGMATROOPER",
+            "ADMIRALPIETT",
+            "SHORETROOPER",
+            "RANGETROOPER"
+        ]
+    },
+
+    "imperial_troopers": {
+        "COLONELSTARCK": "Colone Starck",
+        "DARKTROOPER": "Dark Trooper",
+        "DEATHTROOPER": "Death Trooper",
+        "STORMTROOPER": "Stormtrooper",
+        "MOFFGIDEONS1": "Moff Gideon",
+        "VEERS": "Veers",
+        "IDENVERSIOEMPIRE": "Iden Versio",
+        "MAGMATROOPER": "Magmatrooper",
+        "ADMIRALPIETT": "Admiral Piett",
+        "SHORETROOPER": "Shoretrooper",
+        "RANGETROOPER": "Range Trooper"
+    }
+}
