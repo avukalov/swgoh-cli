@@ -1,25 +1,51 @@
 import os
 from statistics import median
 from swgoh_comlink import SwgohComlink
-from swgoh.shared import RedisAdapter 
+from swgoh.shared import RedisAdapter, MongoAdapter
 from swgoh.shared.models import GuildTwReport, GuildReportKeys
 
 class ComlinkSyncService:
     
     def __init__(self) -> None:
-        self._cache = RedisAdapter()
         self._comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
+        self._mongo = MongoAdapter()
+        # self._redis = RedisAdapter()
         
-        # self._cache = RedisAdapter()
+        # self._redis = RedisAdapter()
         # self._comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
 
+    def __await__(self):
+        return self.init().__await__()
+
+    async def init(self): 
+        self._redis = await RedisAdapter()
+        return self
  
-    def get_guild(self, id: str, call_api: bool = False) -> dict:
+    def getGuild(self, id: str, call_api: bool = False) -> dict:
 
         if not call_api:
-            guild = self._cache.hget('guilds', id)
+            guild = self._redis.hget('guilds', id)
             if guild:
                 return guild
+               
+        guild = self._comlink.getGuild(id)
+
+        # TODO: Add better error hanlding
+        if 'code' in guild.keys() and guild['code'] == 32:
+            return None
+        
+        self._redis.hset('guildsByName', guild['profile']['name'], id)
+
+        return guild
+    
+    async def getGuild2(self, id: str, call_api: bool = False) -> dict:
+        
+        guildExist = await self._redis.sismember('guilds:ids', id)
+        
+        # If call_api is False and guildExists is True return guild from cache
+        if not call_api and guildExist:
+            guild = await self._mongo.guilds.find_one({ 'profile.id': id })
+            if guild: return guild
                
         guild = self._comlink.get_guild(id)
 
@@ -27,80 +53,83 @@ class ComlinkSyncService:
         if 'code' in guild.keys() and guild['code'] == 32:
             return None
         
-        self._cache.hset('guilds', id, guild)
+        await self._mongo.guilds.insert_one(guild)
+
+        if not guildExist:
+            await self._redis.sadd('guilds:ids', id)
+            await self._redis.hset('guilds:names', guild['profile']['name'], id)
 
         return guild
 
-    def get_guild_members(self, id: str, call_api: bool = False) -> dict:
+    async def getGuildMembers(self, id: str, call_api: bool = False) -> dict:
         if not call_api:
-            membersKeys = self._cache.hkeys(f'{id}.members')
-            members = [self._cache.hget('players', id) for id in membersKeys]
-            if members:
-                return members
+            membersIds = await self._redis.smembers(f'guilds:{id}:members')
+            members = await self._mongo.players.find_many({})
+            if members: return members
                 
-        members = self.get_guild(id, call_api)['member']
+        members = await self.getGuild(id, call_api)['member']
         
         full_members= []
         for member in members:
-            self._cache.hset(f'{id}.members', member['playerId'], member)
-            full_members.append(self.get_player(member['playerId']))
+            
+            self._redis.hset(f'{id}.members', member['playerId'], member)
             
         return full_members
     
-    def get_player(self, id: str, call_api: bool = False) -> dict:
+    def getPlayer(self, id: str, call_api: bool = False) -> dict:
         
         if not call_api:
-            player = self._cache.hget('players', id)
+            player = self._redis.hget('players', id)
             if player:
                 return player
             
-        player = self._comlink.get_player(player_id=id)
+        player = self._comlink.getPlayer(player_id=id)
         
-        self._cache.hset('players', player['playerId'], player)
-        self._cache.hset('players.allyCodes', player['allyCode'], player['playerId'])
-        self._cache.hset('players.names', player['name'], player['playerId'])
+        self._redis.hset('players', player['playerId'], player)
+        self._redis.hset('players.allyCodes', player['allyCode'], player['playerId'])
+        self._redis.hset('players.names', player['name'], player['playerId'])
 
         return player
 
-    def get_guild_report(self, id: str, key: GuildReportKeys) -> dict | str:
+    def getGuildReport(self, id: str, key: GuildReportKeys) -> dict | str:
         
         match key:
             case GuildReportKeys.TW:
-                report = self._cache.hget('guilds.report.tw', id)
+                report = self._redis.hget('guilds.report.tw', id)
                 if not report:
                     return id
                 return GuildTwReport(report)
             case GuildReportKeys.TB:
-                return self._cache.hget('guilds.report.tb', id)
+                return self._redis.hget('guilds.report.tb', id)
             case GuildReportKeys.RAID: 
-                return self._cache.hget('guilds.report.raid', id)
+                return self._redis.hget('guilds.report.raid', id)
             case _:
                 return None
 
-    def save_report(self, id: str, key: GuildReportKeys, value: GuildTwReport) -> None:
+    def saveTwReport(self, id: str, key: GuildReportKeys, value: GuildTwReport) -> None:
         
         match key:
             case GuildReportKeys.TW:
-                self._cache.hset('guilds.report.tw', id, value.__dict__)
+                self._redis.hset('guilds.report.tw', id, value.__dict__)
                 return
             case GuildReportKeys.TB:
-                self._cache.hset('guilds.report.tb', id, value.__dict__)
+                self._redis.hset('guilds.report.tb', id, value.__dict__)
                 return 
             case GuildReportKeys.RAID: 
-                self._cache.hset('guilds.report.raid', id, value.__dict__)
+                self._redis.hset('guilds.report.raid', id, value.__dict__)
                 return 
             case _:
                 return
 
-    def get_guild_overall(self, id: str, call_api: bool = False) -> GuildTwReport | None:
+    def getGuildOverall(self, id: str, call_api: bool = False) -> GuildTwReport | None:
         
         if not call_api:
-            guild = self._cache.hget('guilds.overall', id)
+            guild = self._redis.hget('guilds.overall', id)
             if guild:
                 return GuildTwReport(guild)
 
 
-        guild = self.get_guild(id, call_api)
+        guild = self.getGuild(id, call_api)
         if not guild:
             return None
 
@@ -119,11 +148,11 @@ class ComlinkSyncService:
         for member in guild['member']:
             
             # TODO: Move out of here
-            member = self._comlink.get_player(player_id=member['playerId'])
+            member = self._comlink.getPlayer(player_id=member['playerId'])
             if not member:
                 continue
             
-            self._cache.hset(f'{id}.members', member['playerId'], member)
+            self._redis.hset(f'{id}.members', member['playerId'], member)
             # TODO: Move out of here
 
 
@@ -152,7 +181,7 @@ class ComlinkSyncService:
         guild_overall.overall['medCurrArenaRank'] = median(arena_ranks)
         guild_overall.overall['medCurrFleetArenaRank'] = median(fleet_arena_ranks)
 
-        self._cache.hset('guilds.overall', id, guild_overall.__dict__)
+        self._redis.hset('guilds.overall', id, guild_overall.__dict__)
 
         return guild_overall
         

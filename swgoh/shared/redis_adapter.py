@@ -1,65 +1,70 @@
-import os, json
-from redis import Redis
+import os, json, asyncio
+from redis.asyncio import BlockingConnectionPool, Redis
 
 class RedisAdapter():
 
     def __init__(self) -> None:
-        self.__redis = Redis(
+        self.__pool = BlockingConnectionPool(
             host=os.getenv('REDIS_HOST'),
             port=os.getenv('REDIS_PORT'),
             password=os.getenv('REDIS_PASSWORD'),
+            decode_responses=True,
             db=1
         )
+        
+    def __await__(self):
+        return self.init().__await__()
 
+    async def init(self):
+        self._redis: Redis = await Redis(connection_pool=self.__pool)
         # Register Lua scripts
-        # self.__redis.register_script()
-        
+        # self._redis.register_script()
+        return self
 
-    # Key -> Value
-    def get(self, key: str) -> any:
-        return json.loads(self.__redis.get(key))
 
-    def set(self, key: str, value: any) -> bool | None:
-        return self.__redis.set(key, json.dumps(value))
+    # KEY - VALUE
+    async def get(self, key: str) -> any:
+        return json.loads(await self._redis.get(key))
 
-    def keys(self, pattern: str) -> list:
-        keys = self.__redis.keys(pattern)
+    async def set(self, key: str, value: any) -> bool | None:
+        return await self._redis.set(key, json.dumps(value))
+
+    async def keys(self, pattern: str) -> list:
+        keys = await self._redis.keys(pattern)
         if not keys:
             return []
         return [key.decode('utf-8') for key in keys]
     
 
-    # Set
-    def sadd(self, set_key: str, value: any):
-        # self.__redis
-        return self.__redis.sadd(set_key, json.dumps(value))
+    # SET
+    async def sadd(self, set_key: str, value: any):
+        return await self._redis.sadd(set_key, json.dumps(value))
     
+    async def sismember(self, key: str, value: any):
+        return await self._redis.sismember(key, json.dumps(value))
 
-    # Hashset
-    def hget(self, name: str, key: str) -> dict | None:
+    async def smembers(self, key: str):
+        return [json.loads(value) for value in await self._redis.smembers(key)]
+
+    # HASHSET
+    async def hget(self, name: str, key: str) -> dict | None:
+        guild = await self._redis.hget(name, key)
+        return json.loads(guild) if guild else None
         
-        guild = self.__redis.hget(name, key);
-        if guild:
-            return json.loads(guild)
-        return None
+    async def hgetall(self, name: str) -> dict:
+        return json.loads(await self._redis.hgetall(name))
 
-    def hgetall(self, name: str) -> dict:
-        return json.loads(self.__redis.hgetall(name))
+    async def hset(self, name: str, key: str, value: any):
+        return await self._redis.hset(name, key, json.dumps(value))
 
-    def hset(self, name: str, key: str, value: any):
-        return self.__redis.hset(name, key, json.dumps(value))
+    async def hkeys(self, name: str) -> list:
+        return [key.decode('utf-8') for key in await self._redis.hkeys(name)]
 
-    def hkeys(self, name: str) -> list:
-        keys = self.__redis.hkeys(name)
-        if not keys:
-            return []
-        return [key.decode('utf-8') for key in keys]
-
-    def hvals(self, name: str) -> dict:
-        return [json.loads(val) for val in self.__redis.hvals(name)]
+    async def hvals(self, name: str) -> dict:
+        return [json.loads(val) for val in await self._redis.hvals(name)]
     
-    def hdel(self, name: str, key: str):
+    async def hdel(self, name: str, key: str):
         # TODO: Test what is 'any'
-        return self.hdel(name, key)
+        return await self._redis.hdel(name, key)
 
     

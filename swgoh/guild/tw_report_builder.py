@@ -27,8 +27,10 @@ class TWReportBuilder:
         if member['level'] == 85:
                 self.__skill_ratings.append(member['playerRating']['playerSkillRating']['skillRating'])
 
+        if member['level'] >= 60:
+            self.__fleet_arena_ranks.append(member['pvpProfile'][1]['rank'])
+            
         self.__arena_ranks.append(member['pvpProfile'][0]['rank'])
-        self.__fleet_arena_ranks.append(member['pvpProfile'][1]['rank'])
 
         for unit in member['rosterUnit']:
             for gl in self.__guild.gls.keys():

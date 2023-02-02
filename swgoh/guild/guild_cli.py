@@ -2,7 +2,7 @@ import os, json, datetime
 import asyncclick as click
 from typing import Tuple
 from swgoh import console
-from swgoh.config import config
+from swgoh.config import config, config_group
 from swgoh.guild.guild_manager import GuildManager
 from swgoh.guild.printer import Printer
 
@@ -14,10 +14,13 @@ from swgoh.guild.printer import Printer
 async def guild(ctx, set_home):
     if set_home:
         os.environ['GUILD_ID'] = set_home
-        ctx.obj['home_guild_id'] = set_home
+        ctx.obj['homeGuildId'] = set_home
     
-    ctx.obj['home_guild_id'] = os.getenv('GUILD_ID')
-    
+    ctx.obj['homeGuildId'] = os.getenv('GUILD_ID')
+
+
+# DEBUG
+guild.add_command(config_group)
 
 
 @guild.command()
@@ -27,12 +30,13 @@ async def guild(ctx, set_home):
 @click.pass_context
 async def compare(ctx, ids, sync, export):
     
+    gm = await GuildManager()
     ids = validate_compare_input(ctx.obj, ids)
     if not ids:
         console.print("Execute: swgoh guild compare --help to show more info.")
         return
 
-    result = GuildManager().compare(ids, sync)
+    result = await gm.compare(ids, sync)
     
     if len(result) < 2:
         console.print("Not all guilds are found!")
@@ -61,7 +65,7 @@ async def tb(ctx):
 @click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
 @click.pass_context
 async def dshoth(ctx, export):
-    guild_id = ctx.obj['home_guild_id']
+    guild_id = ctx.obj['homeGuildId']
     result = GuildManager().get_hoth_requirements(guild_id)
 
 
@@ -81,7 +85,7 @@ async def dshoth(ctx, export):
 @tb.command()
 @click.pass_context
 async def test(ctx):
-    guild_id = ctx.obj['home_guild_id']
+    guild_id = ctx.obj['homeGuildId']
     # result = GuildManager().get_hoth_requirements(guild_id)
     console.print_json(json.dumps(config))
 
@@ -97,10 +101,10 @@ def validate_compare_input(obj: dict, ids: Tuple[str, str]) -> Tuple[str, str] |
         return (ids[0], ids[1])
     
     if len(ids) == 1:
-        my_guild = obj['home_guild_id']
+        my_guild = obj['homeGuildId']
         if not my_guild:
             return None
-        ids = (obj['home_guild_id'], ids[0])
+        ids = (obj['homeGuildId'], ids[0])
 
     return ids
 

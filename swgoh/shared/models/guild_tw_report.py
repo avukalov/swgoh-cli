@@ -25,7 +25,7 @@ class GuildTwReport(object):
                     "JEDIMASTERLUKSKYWALKER": { 'name': "JMLS", 'count': 0 },
                     "LORDVADER": { 'name': "LV", 'count': 0 },
                     "GLREY": { 'name': "REY", 'count': 0 },
-                    "SITHETERNALEMPEROR": { 'name': "SEE", 'count': 0 },
+                    "SITHPALPATINE": { 'name': "SEE", 'count': 0 },
                     "SUPREMELEADERKYLOREN": { 'name': "SLKR", 'count': 0 }
                 },
                 'ships': {},

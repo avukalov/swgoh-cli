@@ -1,6 +1,6 @@
 import os
 from swgoh import console
-from swgoh.config import format_long_number, format_allyCode
+from swgoh.config import formatLongNumber, formatAllyCode
 from swgoh.shared.models import GuildTwReport, PlayerBase, UnitBase
 
 from rich.console import Console
@@ -82,8 +82,8 @@ class Printer:
             table.add_column('', style="yellow")
 
             table.add_row('Player', f"{member.name}")
-            table.add_row('Galactic Power', f"{format_long_number(member.gp)} GP")
-            table.add_row('Ally Code', format_allyCode(member.allyCode))
+            table.add_row('Galactic Power', f"{formatLongNumber(member.gp)} GP")
+            table.add_row('Ally Code', formatAllyCode(member.allyCode))
 
             table.add_section()
 
@@ -99,7 +99,7 @@ class Printer:
             panel.border_style = "green"
 
         panel.renderable = f"{unit.name}\n"
-        panel.renderable += f"GP: {format_long_number(unit.gp)}\n"
+        panel.renderable += f"GP: {formatLongNumber(unit.gp)}\n"
         panel.renderable += f"Gear: {unit.gear}\n"
         panel.renderable += f"Stars: {unit.stars}\n"
         panel.renderable += f"Lv: {unit.level}"
@@ -141,84 +141,84 @@ class Printer:
 
         # GP
         if g1.gp > g2.gp:
-            guild1.gp = Text(format_long_number(g1.gp), style="bold green")
-            guild2.gp = Text(format_long_number(g2.gp), style="bold red")
+            guild1.gp = Text(formatLongNumber(g1.gp), style="bold green")
+            guild2.gp = Text(formatLongNumber(g2.gp), style="bold red")
         elif g1.gp < g2.gp:
-            guild2.gp = Text(format_long_number(g2.gp), style="bold green")
-            guild1.gp = Text(format_long_number(g1.gp), style="bold red")
+            guild2.gp = Text(formatLongNumber(g2.gp), style="bold green")
+            guild1.gp = Text(formatLongNumber(g1.gp), style="bold red")
         else:
-            guild1.gp = Text(format_long_number(g1.gp))
-            guild2.gp = Text(format_long_number(g2.gp))
+            guild1.gp = Text(formatLongNumber(g1.gp))
+            guild2.gp = Text(formatLongNumber(g2.gp))
 
         # Avg GP
         if g1.avgGp > g2.avgGp:
-            guild1.avgGp = Text(format_long_number(g1.avgGp), style="bold green")
-            guild2.avgGp = Text(format_long_number(g2.avgGp), style="bold red")
+            guild1.avgGp = Text(formatLongNumber(g1.avgGp), style="bold green")
+            guild2.avgGp = Text(formatLongNumber(g2.avgGp), style="bold red")
         elif g1.avgGp < g2.avgGp:
-            guild2.avgGp = Text(format_long_number(g2.avgGp), style="bold green")
-            guild1.avgGp = Text(format_long_number(g1.avgGp), style="bold red")
+            guild2.avgGp = Text(formatLongNumber(g2.avgGp), style="bold green")
+            guild1.avgGp = Text(formatLongNumber(g1.avgGp), style="bold red")
         else:
-            guild1.avgGp = Text(format_long_number(g1.avgGp))
-            guild2.avgGp = Text(format_long_number(g2.avgGp))
+            guild1.avgGp = Text(formatLongNumber(g1.avgGp))
+            guild2.avgGp = Text(formatLongNumber(g2.avgGp))
 
 
         # Overall characterGp
         if g1.overall['characterGp'] > g2.overall['characterGp']:
-            guild1.overall['characterGp'] = Text(format_long_number(g1.overall['characterGp']), style="bold green")
-            guild2.overall['characterGp'] = Text(format_long_number(g2.overall['characterGp']), style="bold red")
+            guild1.overall['characterGp'] = Text(formatLongNumber(g1.overall['characterGp']), style="bold green")
+            guild2.overall['characterGp'] = Text(formatLongNumber(g2.overall['characterGp']), style="bold red")
         elif g1.overall['characterGp'] < g2.overall['characterGp']:
-            guild2.overall['characterGp'] = Text(format_long_number(g2.overall['characterGp']), style="bold green")
-            guild1.overall['characterGp'] = Text(format_long_number(g1.overall['characterGp']), style="bold red")
+            guild2.overall['characterGp'] = Text(formatLongNumber(g2.overall['characterGp']), style="bold green")
+            guild1.overall['characterGp'] = Text(formatLongNumber(g1.overall['characterGp']), style="bold red")
         else:
-            guild1.overall['characterGp'] = Text(format_long_number(g1.overall['characterGp']))
-            guild2.overall['characterGp'] = Text(format_long_number(g2.overall['characterGp']))
+            guild1.overall['characterGp'] = Text(formatLongNumber(g1.overall['characterGp']))
+            guild2.overall['characterGp'] = Text(formatLongNumber(g2.overall['characterGp']))
         
 
         # Overall shipGp
         if g1.overall['shipGp'] > g2.overall['shipGp']:
-            guild1.overall['shipGp'] = Text(format_long_number(g1.overall['shipGp']), style="bold green")
-            guild2.overall['shipGp'] = Text(format_long_number(g2.overall['shipGp']), style="bold red")
+            guild1.overall['shipGp'] = Text(formatLongNumber(g1.overall['shipGp']), style="bold green")
+            guild2.overall['shipGp'] = Text(formatLongNumber(g2.overall['shipGp']), style="bold red")
         elif g1.overall['shipGp'] < g2.overall['shipGp']:
-            guild2.overall['shipGp'] = Text(format_long_number(g2.overall['shipGp']), style="bold green")
-            guild1.overall['shipGp'] = Text(format_long_number(g1.overall['shipGp']), style="bold red")
+            guild2.overall['shipGp'] = Text(formatLongNumber(g2.overall['shipGp']), style="bold green")
+            guild1.overall['shipGp'] = Text(formatLongNumber(g1.overall['shipGp']), style="bold red")
         else:
-            guild1.overall['shipGp'] = Text(format_long_number(g1.overall['shipGp']))
-            guild2.overall['shipGp'] = Text(format_long_number(g2.overall['shipGp']))
+            guild1.overall['shipGp'] = Text(formatLongNumber(g1.overall['shipGp']))
+            guild2.overall['shipGp'] = Text(formatLongNumber(g2.overall['shipGp']))
 
 
         # Overall medSkillRating
         if g1.overall['medSkillRating'] > g2.overall['medSkillRating']:
-            guild1.overall['medSkillRating'] = Text(format_long_number(g1.overall['medSkillRating']), style="bold green")
-            guild2.overall['medSkillRating'] = Text(format_long_number(g2.overall['medSkillRating']), style="bold red")
+            guild1.overall['medSkillRating'] = Text(formatLongNumber(g1.overall['medSkillRating']), style="bold green")
+            guild2.overall['medSkillRating'] = Text(formatLongNumber(g2.overall['medSkillRating']), style="bold red")
         elif g1.overall['medSkillRating'] < g2.overall['medSkillRating']:
-            guild2.overall['medSkillRating'] = Text(format_long_number(g2.overall['medSkillRating']), style="bold green")
-            guild1.overall['medSkillRating'] = Text(format_long_number(g1.overall['medSkillRating']), style="bold red")
+            guild2.overall['medSkillRating'] = Text(formatLongNumber(g2.overall['medSkillRating']), style="bold green")
+            guild1.overall['medSkillRating'] = Text(formatLongNumber(g1.overall['medSkillRating']), style="bold red")
         else:
-            guild1.overall['medSkillRating'] = Text(format_long_number(g1.overall['medSkillRating']))
-            guild2.overall['medSkillRating'] = Text(format_long_number(g2.overall['medSkillRating']))
+            guild1.overall['medSkillRating'] = Text(formatLongNumber(g1.overall['medSkillRating']))
+            guild2.overall['medSkillRating'] = Text(formatLongNumber(g2.overall['medSkillRating']))
 
         # Overall medCurrArenaRank
         if g1.overall['medCurrArenaRank'] > g2.overall['medCurrArenaRank']:
-            guild1.overall['medCurrArenaRank'] = Text(format_long_number(g1.overall['medCurrArenaRank']), style="bold red")
-            guild2.overall['medCurrArenaRank'] = Text(format_long_number(g2.overall['medCurrArenaRank']), style="bold green")
+            guild1.overall['medCurrArenaRank'] = Text(formatLongNumber(g1.overall['medCurrArenaRank']), style="bold red")
+            guild2.overall['medCurrArenaRank'] = Text(formatLongNumber(g2.overall['medCurrArenaRank']), style="bold green")
         elif g1.overall['medCurrArenaRank'] < g2.overall['medCurrArenaRank']:
-            guild2.overall['medCurrArenaRank'] = Text(format_long_number(g2.overall['medCurrArenaRank']), style="bold red")
-            guild1.overall['medCurrArenaRank'] = Text(format_long_number(g1.overall['medCurrArenaRank']), style="bold green")
+            guild2.overall['medCurrArenaRank'] = Text(formatLongNumber(g2.overall['medCurrArenaRank']), style="bold red")
+            guild1.overall['medCurrArenaRank'] = Text(formatLongNumber(g1.overall['medCurrArenaRank']), style="bold green")
         else:
-            guild1.overall['medCurrArenaRank'] = Text(format_long_number(g1.overall['medCurrArenaRank']))
-            guild2.overall['medCurrArenaRank'] = Text(format_long_number(g2.overall['medCurrArenaRank']))
+            guild1.overall['medCurrArenaRank'] = Text(formatLongNumber(g1.overall['medCurrArenaRank']))
+            guild2.overall['medCurrArenaRank'] = Text(formatLongNumber(g2.overall['medCurrArenaRank']))
 
         
         # Overall medCurrFleetArenaRank
         if g1.overall['medCurrFleetArenaRank'] > g2.overall['medCurrFleetArenaRank']:
-            guild1.overall['medCurrFleetArenaRank'] = Text(format_long_number(g1.overall['medCurrFleetArenaRank']), style="bold red")
-            guild2.overall['medCurrFleetArenaRank'] = Text(format_long_number(g2.overall['medCurrFleetArenaRank']), style="bold green")
+            guild1.overall['medCurrFleetArenaRank'] = Text(formatLongNumber(g1.overall['medCurrFleetArenaRank']), style="bold red")
+            guild2.overall['medCurrFleetArenaRank'] = Text(formatLongNumber(g2.overall['medCurrFleetArenaRank']), style="bold green")
         elif g1.overall['medCurrFleetArenaRank'] < g2.overall['medCurrFleetArenaRank']:
-            guild2.overall['medCurrFleetArenaRank'] = Text(format_long_number(g2.overall['medCurrFleetArenaRank']), style="bold red")
-            guild1.overall['medCurrFleetArenaRank'] = Text(format_long_number(g1.overall['medCurrFleetArenaRank']), style="bold green")
+            guild2.overall['medCurrFleetArenaRank'] = Text(formatLongNumber(g2.overall['medCurrFleetArenaRank']), style="bold red")
+            guild1.overall['medCurrFleetArenaRank'] = Text(formatLongNumber(g1.overall['medCurrFleetArenaRank']), style="bold green")
         else:
-            guild1.overall['medCurrFleetArenaRank'] = Text(format_long_number(g1.overall['medCurrFleetArenaRank']))
-            guild2.overall['medCurrFleetArenaRank'] = Text(format_long_number(g2.overall['medCurrFleetArenaRank']))
+            guild1.overall['medCurrFleetArenaRank'] = Text(formatLongNumber(g1.overall['medCurrFleetArenaRank']))
+            guild2.overall['medCurrFleetArenaRank'] = Text(formatLongNumber(g2.overall['medCurrFleetArenaRank']))
 
         
         return [guild1, guild2]

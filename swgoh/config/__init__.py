@@ -4,20 +4,20 @@ from swgoh.config.config import config as config_group
 import json
 
 
-def format_long_number(number: int) -> str:
+def formatLongNumber(number: int) -> str:
         return "{:,}".format(number)
 
-def format_allyCode(allyCode: int):
+def formatAllyCode(allyCode: int):
         return '-'.join(str(allyCode[i:i+3]) for i in range(0, len(allyCode), 3))
 
-def get_config() -> dict:
+def getConfig() -> dict:
         
         config = {}
 
-        with open('./swgoh/config/game_data.json', 'r') as game_data:
-                config = json.load(game_data)
+        with open('./swgoh/config/game_data.json', 'r') as gameData:
+                config = json.load(gameData)
 
         return config
 
 
-config = get_config()
+config = getConfig()

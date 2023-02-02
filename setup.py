@@ -14,11 +14,13 @@ setup(
     # scripts=['capitalize/bin/cap_script.py'],
     # package_data={'capitalize': ['data/cap_data.txt']}
     install_requires=[
-        'AsyncClick',
         'anyio',
-        'swgoh_comlink',
+        'AsyncClick',
         'python-dotenv',
-        'redis'
+        'swgoh_comlink',
+        'redis',
+        'motor',
+        'rich'
     ],
     entry_points={
         'console_scripts': [

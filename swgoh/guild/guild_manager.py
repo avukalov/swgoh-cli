@@ -12,34 +12,34 @@ class GuildManager(ComlinkSyncService):
         ComlinkSyncService.__init__(self)
 
 
-    def compare(self, ids: Tuple[str, str], call_api: bool = False) -> list[GuildTwReport | None]:
+    async def compare(self, ids: Tuple[str, str], call_api: bool = False) -> list[GuildTwReport | None]:
         
         missing_reports = [id for id in ids]
         if not call_api:
             
-            reports = [self.get_guild_report(id, GuildReportKeys.TW) for id in ids]
+            reports = [self.getGuildReport(id, GuildReportKeys.TW) for id in ids]
             missing_reports = [r for r in reports if r in ids]
 
             if len(missing_reports) == 0:
                 return reports
         
-        guilds = [self.get_guild(id, call_api) for id in missing_reports]
+        guilds = [await self.getGuild2(id, call_api) for id in missing_reports]
 
         reports: list[GuildTwReport] = []
         for guild in guilds: 
             builder = TWReportBuilder()
             builder.add_guild_stats(guild)
 
-            members = self.get_guild_members(guild['profile']['id'])
+            members = self.getGuildMembers(guild['profile']['id'])
             for member in members:
-                player = self.get_player(member['playerId'], call_api)
+                player = self.getPlayer(member['playerId'], call_api)
                 builder.add_member_stats(player)
             
             builder.add_total_ratings()
             reports.append(builder.build())
         
         for report in reports:
-            self.save_report(report.id, GuildReportKeys.TW, report)
+            self.saveTwReport(report.id, GuildReportKeys.TW, report)
 
         return reports
 
@@ -49,7 +49,7 @@ class GuildManager(ComlinkSyncService):
         # TODO: Export it
         territory_battle = config['TB'][TBKeys.DSHOTH.value]['battles']['PROBE_DROID']
         
-        members = self.get_guild_members(id, call_api)
+        members = self.getGuildMembers(id, call_api)
 
         members_rosters = []
         for member in members:
