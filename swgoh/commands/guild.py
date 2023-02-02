@@ -57,10 +57,11 @@ def tb(ctx):
 
 @tb.command()
 @click.option('--export', type=str, default=None, help="Exports print output in SVG format to given path")
+@click.option('--sync', is_flag=True, help="Calls api to get most recent data even if data cached")
 @click.pass_context
-def dshoth(ctx, export):
+def dshoth(ctx, export, sync):
     guild_id = ctx.obj['home_guild_id']
-    result = GuildService().get_hoth_requirements(guild_id)
+    result = GuildService().get_hoth_requirements(guild_id, sync)
 
 
     

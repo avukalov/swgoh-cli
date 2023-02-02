@@ -33,17 +33,19 @@ class ComlinkSyncService:
 
     def get_guild_members(self, id: str, call_api: bool = False) -> dict:
         if not call_api:
-            members = self._cache.hvals(f'{id}.members')
+            membersKeys = self._cache.hkeys(f'{id}.members')
+            members = [self._cache.hget('players', id) for id in membersKeys]
             if members:
                 return members
                 
         members = self.get_guild(id, call_api)['member']
         
+        full_members= []
         for member in members:
-            
             self._cache.hset(f'{id}.members', member['playerId'], member)
+            full_members.append(self.get_player(member['playerId']))
             
-        return members
+        return full_members
     
     def get_player(self, id: str, call_api: bool = False) -> dict:
         
