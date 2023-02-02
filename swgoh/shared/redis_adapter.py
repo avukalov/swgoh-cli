@@ -28,6 +28,9 @@ class RedisAdapter():
 
     async def set(self, key: str, value: any) -> bool | None:
         return await self._redis.set(key, json.dumps(value))
+    
+    async def delete(self, key: str):
+        return await self._redis.delete(key)
 
     async def keys(self, pattern: str) -> list:
         keys = await self._redis.keys(pattern)

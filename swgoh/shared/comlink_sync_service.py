@@ -1,5 +1,7 @@
 import os
 from statistics import median
+from bson.objectid import ObjectId
+
 from swgoh_comlink import SwgohComlink
 from swgoh.shared import RedisAdapter, MongoAdapter
 from swgoh.shared.models import GuildTwReport, GuildReportKeys
@@ -64,72 +66,72 @@ class ComlinkSyncService:
     async def getGuildMembers(self, id: str, call_api: bool = False) -> dict:
         if not call_api:
             membersIds = await self._redis.smembers(f'guilds:{id}:members')
-            members = await self._mongo.players.find_many({})
-            if members: return members
+            # cursor = self._mongo.players.find({ 'playerId': { '$in': membersIds } })
+            if membersIds: return members
                 
-        members = await self.getGuild(id, call_api)['member']
-        
-        full_members= []
+        members = (await self.getGuild2(id, call_api))['member']
+        await self._redis.delete(f'guilds:{id}:members')
+
+        ids = []
         for member in members:
-            
-            self._redis.hset(f'{id}.members', member['playerId'], member)
-            
-        return full_members
+            ids.append(member['playerId'])
+            await self._redis.sadd(f'guilds:{id}:members', member['playerId'])
+
+        return ids
     
-    def getPlayer(self, id: str, call_api: bool = False) -> dict:
+    async def getPlayer(self, id: str, call_api: bool = False) -> dict:
         
         if not call_api:
-            player = self._redis.hget('players', id)
-            if player:
-                return player
+            player = await self._mongo.players.find_one({ 'playerId': id })
+            if player: return player
             
-        player = self._comlink.getPlayer(player_id=id)
-        
-        self._redis.hset('players', player['playerId'], player)
-        self._redis.hset('players.allyCodes', player['allyCode'], player['playerId'])
-        self._redis.hset('players.names', player['name'], player['playerId'])
+        player = self._comlink.get_player(player_id=id)
+
+        await self._mongo.players.insert_one(player)
+        await self._redis.hset('players:allyCodes', player['allyCode'], player['playerId'])
+        await self._redis.hset('players:names', player['name'], player['playerId'])
 
         return player
 
-    def getGuildReport(self, id: str, key: GuildReportKeys) -> dict | str:
+    async def getGuildReport(self, id: str, key: GuildReportKeys) -> dict | str:
         
         match key:
             case GuildReportKeys.TW:
-                report = self._redis.hget('guilds.report.tw', id)
+                report = await self._redis.hget('guilds.report.tw', id)
                 if not report:
                     return id
                 return GuildTwReport(report)
             case GuildReportKeys.TB:
-                return self._redis.hget('guilds.report.tb', id)
+                return await self._redis.hget('guilds.report.tb', id)
             case GuildReportKeys.RAID: 
-                return self._redis.hget('guilds.report.raid', id)
+                return await self._redis.hget('guilds.report.raid', id)
             case _:
                 return None
 
-    def saveTwReport(self, id: str, key: GuildReportKeys, value: GuildTwReport) -> None:
+    async def saveTwReport(self, id: str, key: GuildReportKeys, value: GuildTwReport) -> None:
         
         match key:
             case GuildReportKeys.TW:
-                self._redis.hset('guilds.report.tw', id, value.__dict__)
+                await self._redis.hset('guilds.report.tw', id, value.__dict__)
                 return
             case GuildReportKeys.TB:
-                self._redis.hset('guilds.report.tb', id, value.__dict__)
+                await self._redis.hset('guilds.report.tb', id, value.__dict__)
                 return 
             case GuildReportKeys.RAID: 
-                self._redis.hset('guilds.report.raid', id, value.__dict__)
+                await self._redis.hset('guilds.report.raid', id, value.__dict__)
                 return 
             case _:
                 return
 
-    def getGuildOverall(self, id: str, call_api: bool = False) -> GuildTwReport | None:
+    async def getGuildOverall(self, id: str, call_api: bool = False) -> GuildTwReport | None:
         
         if not call_api:
-            guild = self._redis.hget('guilds.overall', id)
+            guild = await self._redis.hget('guilds.overall', id)
             if guild:
                 return GuildTwReport(guild)
 
 
-        guild = self.getGuild(id, call_api)
+        guild = await self.getGuild2(id, call_api)
         if not guild:
             return None
 

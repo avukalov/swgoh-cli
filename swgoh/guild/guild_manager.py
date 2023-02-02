@@ -17,7 +17,7 @@ class GuildManager(ComlinkSyncService):
         missing_reports = [id for id in ids]
         if not call_api:
             
-            reports = [self.getGuildReport(id, GuildReportKeys.TW) for id in ids]
+            reports = [await self.getGuildReport(id, GuildReportKeys.TW) for id in ids]
             missing_reports = [r for r in reports if r in ids]
 
             if len(missing_reports) == 0:
@@ -30,16 +30,16 @@ class GuildManager(ComlinkSyncService):
             builder = TWReportBuilder()
             builder.add_guild_stats(guild)
 
-            members = self.getGuildMembers(guild['profile']['id'])
-            for member in members:
-                player = self.getPlayer(member['playerId'], call_api)
+            membersIds = await self.getGuildMembers(guild['profile']['id'])
+            for id in membersIds:
+                player = await self.getPlayer(id, call_api)
                 builder.add_member_stats(player)
             
             builder.add_total_ratings()
             reports.append(builder.build())
         
         for report in reports:
-            self.saveTwReport(report.id, GuildReportKeys.TW, report)
+            await self.saveTwReport(report.id, GuildReportKeys.TW, report)
 
         return reports
 

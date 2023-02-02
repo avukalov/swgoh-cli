@@ -12,8 +12,9 @@ async def config(ctx):
 
 
 @config.command()
+@click.option('--sync', is_flag=True, help="Calls api to get most recent data even if data cached")
 @click.pass_context
-async def test(ctx):
+async def test(ctx, sync):
     comlink = await ComlinkSyncService()
-    await comlink.getGuild2(ctx.obj['homeGuildId'], False)
+    await comlink.getGuild2(ctx.obj['homeGuildId'], sync)
     print("config test!")
