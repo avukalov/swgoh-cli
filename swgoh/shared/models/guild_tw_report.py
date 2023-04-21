@@ -11,6 +11,8 @@ class GuildTwReport(object):
     ships: dict[str, dict[Text, int | Text]]
     overall: dict[str, int | Text]
 
+
+    #TODO: CHANGE MODEL TO FIT DATABASE
     def __init__(self, guild: dict = None) -> None:
         if not guild:
             guild = {
@@ -22,7 +24,7 @@ class GuildTwReport(object):
                 'gls': {
                     "JABBATHEHUTT": { 'name': "JABBA", 'count': 0 },
                     "JEDIMASTERKENOBI": { 'name': "JMK", 'count': 0 },
-                    "JEDIMASTERLUKSKYWALKER": { 'name': "JMLS", 'count': 0 },
+                    "GRANDMASTERLUKE": { 'name': "JMLS", 'count': 0 },
                     "LORDVADER": { 'name': "LV", 'count': 0 },
                     "GLREY": { 'name': "REY", 'count': 0 },
                     "SITHPALPATINE": { 'name': "SEE", 'count': 0 },

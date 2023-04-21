@@ -1,4 +1,4 @@
-import os, json, asyncio
+import os, json
 from redis.asyncio import BlockingConnectionPool, Redis
 
 class RedisAdapter():
@@ -33,10 +33,7 @@ class RedisAdapter():
         return await self._redis.delete(key)
 
     async def keys(self, pattern: str) -> list:
-        keys = await self._redis.keys(pattern)
-        if not keys:
-            return []
-        return [key.decode('utf-8') for key in keys]
+        return [key.decode('utf-8') for key in await self._redis.keys(pattern)]
     
 
     # SET
@@ -66,8 +63,7 @@ class RedisAdapter():
     async def hvals(self, name: str) -> dict:
         return [json.loads(val) for val in await self._redis.hvals(name)]
     
-    async def hdel(self, name: str, key: str):
-        # TODO: Test what is 'any'
+    async def hdel(self, name: str, key: str) -> int:
         return await self._redis.hdel(name, key)
 
     

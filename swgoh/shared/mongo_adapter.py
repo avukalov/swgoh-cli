@@ -17,6 +17,11 @@ class MongoAdapter:
         self.guilds = self._mongoDb['guilds']
         self.players = self._mongoDb['players']
         self.reports = self._mongoDb['reports']
+
+        self.guilds.create_index("profile.id")
+        self.players.create_index("guildId")
+        self.players.create_index("playerId")
+        
     
     # def __await__(self):
     #     return self.init().__await__()

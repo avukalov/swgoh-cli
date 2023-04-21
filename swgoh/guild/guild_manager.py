@@ -1,9 +1,15 @@
 import requests, json
 from typing import Tuple
-from swgoh.shared.models import GuildTwReport, GuildReportKeys, TBKeys, UnitBase, PlayerBase
-from swgoh.shared import ComlinkSyncService
-from swgoh.guild.tw_report_builder import TWReportBuilder
 from swgoh.config import config
+from swgoh.guild.tw_report_builder import TWReportBuilder
+from swgoh.shared import ComlinkSyncService
+from swgoh.shared.models import (
+    GuildTwReport,
+    GuildReportKeys,
+    TBKeys,
+    UnitBase,
+    PlayerBase
+)
 
 
 class GuildManager(ComlinkSyncService):
@@ -16,7 +22,6 @@ class GuildManager(ComlinkSyncService):
         
         missing_reports = [id for id in ids]
         if not call_api:
-            
             reports = [await self.getGuildReport(id, GuildReportKeys.TW) for id in ids]
             missing_reports = [r for r in reports if r in ids]
 
@@ -31,6 +36,7 @@ class GuildManager(ComlinkSyncService):
             builder.add_guild_stats(guild)
 
             membersIds = await self.getGuildMembers(guild['profile']['id'])
+            print(membersIds)
             for id in membersIds:
                 player = await self.getPlayer(id, call_api)
                 builder.add_member_stats(player)

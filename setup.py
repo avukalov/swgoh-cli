@@ -20,6 +20,7 @@ setup(
         'swgoh_comlink',
         'redis',
         'motor',
+        'pymongo'
         'rich'
     ],
     entry_points={

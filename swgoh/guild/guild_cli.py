@@ -15,7 +15,6 @@ async def guild(ctx, set_home):
     if set_home:
         os.environ['GUILD_ID'] = set_home
         ctx.obj['homeGuildId'] = set_home
-    
     ctx.obj['homeGuildId'] = os.getenv('GUILD_ID')
 
 

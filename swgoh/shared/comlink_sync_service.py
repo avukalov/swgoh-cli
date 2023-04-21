@@ -1,8 +1,7 @@
 import os
 from statistics import median
-from bson.objectid import ObjectId
-
 from swgoh_comlink import SwgohComlink
+
 from swgoh.shared import RedisAdapter, MongoAdapter
 from swgoh.shared.models import GuildTwReport, GuildReportKeys
 
@@ -11,10 +10,6 @@ class ComlinkSyncService:
     def __init__(self) -> None:
         self._comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
         self._mongo = MongoAdapter()
-        # self._redis = RedisAdapter()
-        
-        # self._redis = RedisAdapter()
-        # self._comlink = SwgohComlink(url=os.getenv('COMLINK_URI'))
 
     def __await__(self):
         return self.init().__await__()
@@ -22,6 +17,7 @@ class ComlinkSyncService:
     async def init(self): 
         self._redis = await RedisAdapter()
         return self
+ 
  
     def getGuild(self, id: str, call_api: bool = False) -> dict:
 
@@ -55,6 +51,7 @@ class ComlinkSyncService:
         if 'code' in guild.keys() and guild['code'] == 32:
             return None
         
+        await self._mongo.guilds.delete_one({'profile.id': id })
         await self._mongo.guilds.insert_one(guild)
 
         if not guildExist:
@@ -67,7 +64,7 @@ class ComlinkSyncService:
         if not call_api:
             membersIds = await self._redis.smembers(f'guilds:{id}:members')
             # cursor = self._mongo.players.find({ 'playerId': { '$in': membersIds } })
-            if membersIds: return members
+            if membersIds: return membersIds
                 
         members = (await self.getGuild2(id, call_api))['member']
         await self._redis.delete(f'guilds:{id}:members')
@@ -87,7 +84,9 @@ class ComlinkSyncService:
             
         player = self._comlink.get_player(player_id=id)
 
+        await self._mongo.players.delete_one({'playerId': player['playerId']})
         await self._mongo.players.insert_one(player)
+
         await self._redis.hset('players:allyCodes', player['allyCode'], player['playerId'])
         await self._redis.hset('players:names', player['name'], player['playerId'])
 
@@ -98,9 +97,7 @@ class ComlinkSyncService:
         match key:
             case GuildReportKeys.TW:
                 report = await self._redis.hget('guilds.report.tw', id)
-                if not report:
-                    return id
-                return GuildTwReport(report)
+                return GuildTwReport(report) if report else id
             case GuildReportKeys.TB:
                 return await self._redis.hget('guilds.report.tb', id)
             case GuildReportKeys.RAID: 
